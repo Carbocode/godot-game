@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://ny4bvseiqynw"]
+
+[ext_resource type="Script" path="res://scenes/world/time/DateTime.gd" id="1_gkw6v"]
+
+[node name="DateTime" type="Node"]
+script = ExtResource("1_gkw6v")
+pause = true

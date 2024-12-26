@@ -1,0 +1,7 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://dvtmfb71kkij4"]
+
+[ext_resource type="FontFile" uid="uid://bo78fmq6powm0" path="res://assets/fonts/Inter-VariableFont.ttf" id="1_ytjge"]
+
+[resource]
+font = ExtResource("1_ytjge")
+font_size = 48

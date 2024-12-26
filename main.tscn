@@ -1,3 +1,56 @@
-[gd_scene format=3 uid="uid://cg03xi7wij2bt"]
+[gd_scene load_steps=8 format=3 uid="uid://cg03xi7wij2bt"]
+
+[ext_resource type="PackedScene" uid="uid://dc1qphl8wgwjc" path="res://scenes/characters/player/Character.tscn" id="1_o0k5m"]
+[ext_resource type="Terrain3DMaterial" uid="uid://bf7jr3vtpxin1" path="res://assets/textures/ground/new_terrain_3d_material.res" id="2_kjtha"]
+[ext_resource type="Terrain3DAssets" uid="uid://bqyp1kf7sdib0" path="res://assets/textures/ground/new_terrain_3d_assets.res" id="3_lns0f"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_3tul3"]
+energy_multiplier = 3.0
+
+[sub_resource type="Sky" id="Sky_51cjw"]
+sky_material = SubResource("PhysicalSkyMaterial_3tul3")
+
+[sub_resource type="Environment" id="Environment_lt34v"]
+background_mode = 2
+sky = SubResource("Sky_51cjw")
+tonemap_mode = 2
+tonemap_white = 6.0
+ssao_enabled = true
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 0.08
+glow_blend_mode = 1
+fog_enabled = true
+fog_sun_scatter = 0.13
+fog_density = 0.0005
+fog_aerial_perspective = 1.0
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_8y0k7"]
 
 [node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_lt34v")
+camera_attributes = SubResource("CameraAttributesPractical_8y0k7")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.779338, -0.423328, 0.46198, -0.130053, 0.611942, 0.780136, -0.612959, -0.668072, 0.421855, 0, 0, 0)
+light_intensity_lux = 60000.0
+light_temperature = 6000.0
+light_energy = 5.0
+shadow_enabled = true
+directional_shadow_split_1 = 0.04
+directional_shadow_split_2 = 0.11
+directional_shadow_split_3 = 0.33
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 200.0
+
+[node name="CharacterBody3D" parent="." instance=ExtResource("1_o0k5m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.53394, 0)
+
+[node name="Terrain3D" type="Terrain3D" parent="."]
+data_directory = "res://scenes/world/maps"
+material = ExtResource("2_kjtha")
+assets = ExtResource("3_lns0f")
+top_level = true
+metadata/_edit_lock_ = true
