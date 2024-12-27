@@ -14,7 +14,7 @@ func _ready():
 	if time_node_path:
 		time_node = get_node(time_node_path)
 		# Collegati al segnale time_updated
-		time_node.connect("time_updated", Callable(self, "_on_time_updated"))
+		time_node.time_updated.connect(_on_time_updated)
 		# Imposta la rotazione iniziale
 		_on_time_updated(time_node.get_timestamp())
 

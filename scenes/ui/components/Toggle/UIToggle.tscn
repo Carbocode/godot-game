@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://bejq348p1en4l"]
+
+[ext_resource type="Theme" uid="uid://daduvrvmusva" path="res://assets/theme/Theme.tres" id="1_7cx8o"]
+[ext_resource type="Script" path="res://scenes/ui/components/Toggle/UIToggle.gd" id="1_7tma6"]
+[ext_resource type="LabelSettings" uid="uid://bv2dufr3b1iq2" path="res://assets/fonts/Presets/H4.tres" id="2_7d2ol"]
+
+[node name="InputToggle" type="HBoxContainer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -263.0
+offset_bottom = 23.0
+grow_horizontal = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_7cx8o")
+script = ExtResource("1_7tma6")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+text = "Default Label"
+label_settings = ExtResource("2_7d2ol")
+
+[node name="CheckButton" type="CheckButton" parent="."]
+layout_mode = 2

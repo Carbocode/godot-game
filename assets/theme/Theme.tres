@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://daduvrvmusva"]
+
+[ext_resource type="FontFile" uid="uid://bo78fmq6powm0" path="res://assets/fonts/Inter-VariableFont.ttf" id="1_q3psj"]
+
+[resource]
+default_font = ExtResource("1_q3psj")
+default_font_size = 16

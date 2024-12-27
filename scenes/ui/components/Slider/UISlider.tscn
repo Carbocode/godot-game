@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://dj06hrahg8sb1"]
+
+[ext_resource type="Script" path="res://scenes/ui/components/Slider/UISlider.gd" id="1_dqyp6"]
+[ext_resource type="LabelSettings" uid="uid://bv2dufr3b1iq2" path="res://assets/fonts/Presets/H4.tres" id="2_436rc"]
+[ext_resource type="LabelSettings" uid="uid://dtbk3pkoy2fov" path="res://assets/fonts/Presets/Body.tres" id="3_asbjx"]
+
+[node name="InputSlider" type="HBoxContainer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -263.0
+offset_bottom = 23.0
+grow_horizontal = 0
+size_flags_horizontal = 3
+script = ExtResource("1_dqyp6")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+text = "Default Label"
+label_settings = ExtResource("2_436rc")
+
+[node name="HSlider" type="HSlider" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+size_flags_stretch_ratio = 1.5
+step = 0.01
+
+[node name="Value" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.6
+text = "0.00"
+label_settings = ExtResource("3_asbjx")
+horizontal_alignment = 2

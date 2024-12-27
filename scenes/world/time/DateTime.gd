@@ -12,7 +12,7 @@ const FULL_CIRCLE: float = 2 * PI
 	set(value):
 		pause=value
 		set_physics_process(!value)
-		emit_signal("pause_toggled", !value)
+		pause_toggled.emit(!value)
 
 var enlapsed_seconds: float = 1735102800#946728000  # 2000-1-1T12:00:00Z
 var seconds_per_game_second: float = 0.00025  # Velocità di simulazione del tempo
@@ -23,17 +23,17 @@ func _ready():
 func _physics_process(delta):
 	# Incrementa il tempo di gioco
 	enlapsed_seconds += delta / seconds_per_game_second
-	emit_signal("time_updated", enlapsed_seconds)
+	time_updated.emit(enlapsed_seconds)
 	print(_to_string())
 
 # Funzioni per manipolare il tempo
 func add_seconds(seconds: int):
 	enlapsed_seconds += seconds
-	emit_signal("time_updated", enlapsed_seconds)
+	time_updated.emit(enlapsed_seconds)
 
 func set_timestamp(timestamp: int):
 	enlapsed_seconds = timestamp
-	emit_signal("time_updated", enlapsed_seconds)
+	time_updated.emit(enlapsed_seconds)
 
 func get_timestamp() -> int:
 	return enlapsed_seconds

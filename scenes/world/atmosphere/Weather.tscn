@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://ginjuoay3ttl"]
+[gd_scene load_steps=14 format=3 uid="uid://ginjuoay3ttl"]
 
 [ext_resource type="Script" path="res://scripts/world/WeatherSystem.gd" id="1_kqcon"]
-[ext_resource type="PackedScene" uid="uid://dj06hrahg8sb1" path="res://scenes/ui/components/Slider/Slider.tscn" id="2_cx4rv"]
+[ext_resource type="PackedScene" uid="uid://dj06hrahg8sb1" path="res://scenes/ui/components/Slider/UISlider.tscn" id="2_cx4rv"]
 [ext_resource type="Script" path="res://scenes/world/atmosphere/Sun.gd" id="2_lcbvo"]
 [ext_resource type="PackedScene" uid="uid://ny4bvseiqynw" path="res://scenes/world/time/DateTime.tscn" id="4_6knpi"]
+[ext_resource type="PackedScene" uid="uid://bejq348p1en4l" path="res://scenes/ui/components/Toggle/UIToggle.tscn" id="5_dxdqu"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_mtimf"]
 energy_multiplier = 3.0
@@ -25,6 +26,35 @@ volumetric_fog_density = 0.01
 volumetric_fog_length = 248.21
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_rurvw"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_mqedk"]
+emission_shape = 1
+emission_sphere_radius = 128.0
+direction = Vector3(0, -1, 0)
+spread = 5.0
+initial_velocity_min = 32.0
+initial_velocity_max = 32.0
+collision_mode = 1
+collision_friction = 0.0
+collision_bounce = 0.0
+
+[sub_resource type="Curve" id="Curve_elxpf"]
+max_value = 0.1
+_data = [Vector2(0.00278552, 0), 0.0, 1.10607, 0, 0, Vector2(0.0222841, 0.0197183), 0.526702, 0.526702, 0, 0, Vector2(0.147632, 0.0471831), 0.0133061, 0.0133061, 0, 0, Vector2(0.994429, 0.00140845), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wutml"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.627451, 0.705882, 0.698039, 0.0745098)
+use_particle_trails = true
+proximity_fade_distance = 1625.67
+
+[sub_resource type="RibbonTrailMesh" id="RibbonTrailMesh_0g3ve"]
+material = SubResource("StandardMaterial3D_wutml")
+curve = SubResource("Curve_elxpf")
 
 [node name="Weather" type="Node3D"]
 script = ExtResource("1_kqcon")
@@ -49,12 +79,42 @@ time_node_path = NodePath("../DateTime")
 
 [node name="Wind" type="Node" parent="."]
 
-[node name="InputSlider" parent="." instance=ExtResource("2_cx4rv")]
-offset_left = -382.0
-label_text = "Negro"
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -237.0
+offset_bottom = 51.0
+grow_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="InputSlider" parent="PanelContainer/VBoxContainer" instance=ExtResource("2_cx4rv")]
+layout_mode = 2
+target_node = NodePath("../../../Sun")
+label_text = "Sole"
 max_value = 360.0
+unit = "°"
+
+[node name="InputToggle" parent="PanelContainer/VBoxContainer" instance=ExtResource("5_dxdqu")]
+layout_mode = 2
+target_node = NodePath("../../../DateTime")
+target_property = "pause"
+label_text = "Pausa"
+toggle_value = false
 
 [node name="DateTime" parent="." instance=ExtResource("4_6knpi")]
 pause = false
 
 [node name="Clouds" type="GPUParticles3D" parent="."]
+
+[node name="Rain" type="GPUParticles3D" parent="."]
+visible = false
+amount = 50000
+lifetime = 5.0
+randomness = 1.0
+trail_enabled = true
+trail_lifetime = 0.16
+process_material = SubResource("ParticleProcessMaterial_mqedk")
+draw_pass_1 = SubResource("RibbonTrailMesh_0g3ve")
