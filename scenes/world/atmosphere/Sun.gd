@@ -69,7 +69,6 @@ func get_solar_position(latitude: float, longitude: float) -> Dictionary:
 	var time: float = date.hour + date.minute / 60.0 + date.second / 3600.0
 	
 	# Calcolo del tempo solare
-	var day_of_year: float = julian_day - time_node.get_julian_day(year, 1, 1) + 1
 	var solar_time: float = time + longitude / 15.0 + _cached_equation_of_time / 60.0
 	
 	# Calcolo dell'angolo orario
