@@ -1,109 +1,104 @@
 class_name Sun extends DirectionalLight3D
 
-const EARTH_ANGLE: float = deg_to_rad(23.44)
-const FULL_CIRCLE: float = 2 * PI
+# Costanti
+const MIN_ELEVATION: float = deg_to_rad(-6) # Crepuscolo civile
+const MAX_ELEVATION: float = deg_to_rad(40) # Pieno giorno
+const EARTH_ANGLE: float = deg_to_rad(23.44) # Obliquità dell'eclittica
+const ECCENTRICITY: float = 0.0167 # Eccentricità orbitale
+const JULIAN_BASE: float = 2451545.0 # JD di riferimento (1 gennaio 2000 12:00 UTC)
 
-@export var time_node_path: NodePath # Percorso al nodo Time
+# Variabili esportate
+@export var sky_material: ShaderMaterial
 
-var time_node: DateTime
-
+# Cache
 var _cached_day: int = -1
 var _cached_equation_of_time: float = 0.0
 
+# Funzioni base
 func _ready() -> void:
-	# Trova il nodo Time
-	if time_node_path:
-		time_node = get_node(time_node_path)
-		# Collegati al segnale time_updated
-		time_node.time_updated.connect(_on_time_updated)
-		# Imposta la rotazione iniziale
-		_on_time_updated()
+	EventBus.subscribe("time_updated", Callable(self, "_on_time_updated"))
+	_on_time_updated(DateTime.enlapsed_seconds)
 
-func _on_time_updated() -> void:
-	# Ottieni la posizione solare
-	var solar_position: Dictionary = get_solar_position(latitude, longitude)
-	var elevation: float = solar_position["elevation"] # In radianti
-	var azimuth: float = solar_position["azimuth"] # In radianti
-	
-	
-	# Calcola il vettore direzionale del sole
-	var direction: Vector3 = Vector3(
+func _on_time_updated(timestamp: int) -> void:
+	var solar_position: Dictionary = get_solar_position(Geolocation.latitude, Geolocation.longitude)
+	var sun_direction: Vector3 = _calculate_sun_direction(solar_position)
+	_update_sun_and_sky(sun_direction, solar_position["elevation"])
+	_debug_print(solar_position)
+
+func _calculate_sun_direction(solar_position: Dictionary) -> Vector3:
+	var elevation: float = solar_position["elevation"]
+	var azimuth: float = solar_position["azimuth"]
+	return Vector3(
 		sin(azimuth) * cos(elevation),
 		sin(elevation),
 		cos(azimuth) * cos(elevation)
 	)
-	
-	# Usa look_at() invece della rotazione diretta
-	global_transform = global_transform.looking_at(global_position - direction, Vector3.UP)
-	
-	print("Solar Position - Elevation: %f, Azimuth: %f" % [
-		rad_to_deg(elevation),
-		rad_to_deg(azimuth)
-	])
-
-# Funzione per calcolare la declinazione del Sole
-func get_declination(day_of_year_from_equinox: float) -> float:
-	return EARTH_ANGLE * sin(FULL_CIRCLE / DateTime.DAYS_IN_YEAR * day_of_year_from_equinox)
 
 func get_solar_position(latitude: float, longitude: float) -> Dictionary:
 	latitude = clampf(latitude, -90.0, 90.0)
 	longitude = fmod(longitude + 180.0, 360.0) - 180.0
-	
-	# Ottieni data e ora
-	var date: Dictionary = time_node.get_current_datetime()
-	var year: int = date.year
-	var month: int = date.month
-	var day: int = date.day
-	
-	# Calcolo del giorno giuliano
-	var julian_day: float = time_node.get_julian_day(year, month, day)
-	var day_of_year_from_equinox: float = time_node.get_day_of_year_from_equinox(julian_day)
-	
-	# Cache dei calcoli giornalieri
-	if day != _cached_day:
-		_cached_equation_of_time = time_node.get_equation_of_time(day_of_year_from_equinox)
-		_cached_day = day
-	
-	var declination: float = get_declination(day_of_year_from_equinox) # Converti in radianti
-	
-	var time: float = date.hour + date.minute / 60.0 + date.second / 3600.0
-	
-	# Calcolo del tempo solare
-	var solar_time: float = time + longitude / 15.0 + _cached_equation_of_time / 60.0
-	
-	# Calcolo dell'angolo orario
-	var hour_angle: float = deg_to_rad(15.0 * (solar_time - 12.0)) # Converti in radianti
-	
-	# Calcolo dell'elevazione
-	var lat_rad: float = deg_to_rad(latitude)
-	var elevation: float = asin(sin(lat_rad) * sin(declination) + cos(lat_rad) * cos(declination) * cos(hour_angle))
-	
-	# Calcolo dell'azimut
-	# Calcolo dell'azimut con gestione speciale per i poli
-	var azimuth: float
-	
-	# Gestione speciale per i poli (o quasi-poli)
-	if abs(latitude) > 89.9: # Siamo molto vicini ai poli
-		# Al polo sud, il sole si muove in senso orario
-		if latitude < 0:
-			azimuth = -hour_angle
-		# Al polo nord, il sole si muove in senso antiorario
-		else:
-			azimuth = hour_angle
-	else:
-		# Calcolo standard dell'azimut per altre latitudini
-		var sin_azimuth: float = cos(declination) * sin(hour_angle) / cos(elevation)
-		var cos_azimuth: float = (sin(elevation) * sin(lat_rad) - sin(declination)) / (cos(elevation) * cos(lat_rad))
-		azimuth = atan2(sin_azimuth, cos_azimuth)
-		
-		# Correzione più semplice: assicuriamoci che l'azimut sia relativo al nord
-		azimuth = PI + azimuth
-		
-	# Normalizzazione base tra 0 e 2π
-	if azimuth < 0:
-		azimuth += DateTime.FULL_CIRCLE
-	else:
-		while azimuth >= DateTime.FULL_CIRCLE:
-			azimuth = fmod(azimuth, DateTime.FULL_CIRCLE)
-	
+
+	var date: Dictionary = DateTime.get_current_datetime()
+	var julian_day: float = DateTime.get_julian_date(date)
+	var day_of_year_from_equinox: float = _get_day_of_year_from_equinox(julian_day)
+
+	_update_daily_cache(date.day, day_of_year_from_equinox)
+
+	return _calculate_solar_coordinates(latitude, longitude, date, julian_day)
+
+func _update_daily_cache(current_day: int, day_of_year_from_equinox: float) -> void:
+	if current_day != _cached_day:
+		_cached_equation_of_time = DateTime.get_equation_of_time(day_of_year_from_equinox)
+		_cached_day = current_day
+
+func _calculate_solar_coordinates(latitude: float, longitude: float, date: Dictionary, julian_day: float) -> Dictionary:
+	var declination: float = _get_declination(julian_day)
+	var solar_time: float = _calculate_solar_time(date, longitude)
+	var hour_angle: float = deg_to_rad(15.0 * (solar_time - 12.0))
+
+	var elevation: float = _calculate_elevation(latitude, declination, hour_angle)
+	var azimuth: float = _calculate_azimuth(latitude, declination, hour_angle, elevation)
+
 	return {"elevation": elevation, "azimuth": azimuth}
+
+func _get_day_of_year_from_equinox(julian_day: float) -> float:
+	return fmod(julian_day - JULIAN_BASE, 365.25)
+
+func _get_declination(julian_day: float) -> float:
+	var day_of_year: float = _get_day_of_year_from_equinox(julian_day)
+	return EARTH_ANGLE * sin(TAU * day_of_year / 365.25)
+
+func _calculate_solar_time(date: Dictionary, longitude: float) -> float:
+	var time: float = date.hour + date.minute / 60.0 + date.second / 3600.0
+	return time + longitude / 15.0 + _cached_equation_of_time / 60.0
+
+func _calculate_elevation(latitude: float, declination: float, hour_angle: float) -> float:
+	var lat_rad: float = deg_to_rad(latitude)
+	return asin(sin(lat_rad) * sin(declination) + cos(lat_rad) * cos(declination) * cos(hour_angle))
+
+func _calculate_azimuth(latitude: float, declination: float, hour_angle: float, elevation: float) -> float:
+	var lat_rad: float = deg_to_rad(latitude)
+	var sin_azimuth: float = cos(declination) * sin(hour_angle) / cos(elevation)
+	var cos_azimuth: float = (sin(elevation) * sin(lat_rad) - sin(declination)) / (cos(elevation) * cos(lat_rad))
+	return _normalize_azimuth(atan2(sin_azimuth, cos_azimuth))
+
+func _normalize_azimuth(azimuth: float) -> float:
+	if azimuth < 0:
+		azimuth += TAU
+	return azimuth
+
+func _update_sun_and_sky(sun_direction: Vector3, elevation: float) -> void:
+	# Aggiorna posizione sole
+	global_transform = global_transform.looking_at(global_position - sun_direction, Vector3.UP)
+	
+	# Aggiorna materiale cielo
+	if sky_material:
+		sky_material.set_shader_parameter("sun_direction", sun_direction)
+		var day_factor: float = clampf(inverse_lerp(MIN_ELEVATION, MAX_ELEVATION, elevation),0.0, 1.0)
+		sky_material.set_shader_parameter("day_factor", day_factor)
+
+func _debug_print(solar_position: Dictionary) -> void:
+	print("Solar Position - Elevation: %f, Azimuth: %f" % [
+		rad_to_deg(solar_position["elevation"]),
+		rad_to_deg(solar_position["azimuth"])
+	])

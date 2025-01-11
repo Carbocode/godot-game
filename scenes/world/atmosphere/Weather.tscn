@@ -1,16 +1,14 @@
 [gd_scene load_steps=14 format=3 uid="uid://ginjuoay3ttl"]
 
 [ext_resource type="Script" path="res://scripts/world/WeatherSystem.gd" id="1_kqcon"]
+[ext_resource type="Script" path="res://scenes/world/atmosphere/Moon.gd" id="2_a2q3i"]
 [ext_resource type="PackedScene" uid="uid://dj06hrahg8sb1" path="res://scenes/ui/components/Slider/UISlider.tscn" id="2_cx4rv"]
 [ext_resource type="Script" path="res://scenes/world/atmosphere/Sun.gd" id="2_lcbvo"]
-[ext_resource type="PackedScene" uid="uid://ny4bvseiqynw" path="res://scenes/world/time/DateTime.tscn" id="4_6knpi"]
+[ext_resource type="Material" uid="uid://cs64jvaldfbxr" path="res://assets/shaders/Sky.tres" id="2_lo1xn"]
 [ext_resource type="PackedScene" uid="uid://bejq348p1en4l" path="res://scenes/ui/components/Toggle/UIToggle.tscn" id="5_dxdqu"]
 
-[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_mtimf"]
-energy_multiplier = 3.0
-
 [sub_resource type="Sky" id="Sky_0rto3"]
-sky_material = SubResource("PhysicalSkyMaterial_mtimf")
+sky_material = ExtResource("2_lo1xn")
 
 [sub_resource type="Environment" id="Environment_cnvqt"]
 background_mode = 2
@@ -63,8 +61,24 @@ script = ExtResource("1_kqcon")
 environment = SubResource("Environment_cnvqt")
 camera_attributes = SubResource("CameraAttributesPractical_rurvw")
 
+[node name="Moon" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.606281, -0.125947, 0.785214, -0.702633, -0.547288, 0.454734, 0.372466, -0.827413, -0.420305, 0, 0, 0)
+light_intensity_lux = 12590.7
+light_temperature = 6015.0
+light_energy = 1.575
+light_indirect_energy = 10.948
+light_angular_distance = 2.8
+shadow_enabled = true
+directional_shadow_split_1 = 0.04
+directional_shadow_split_2 = 0.11
+directional_shadow_split_3 = 0.33
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 200.0
+script = ExtResource("2_a2q3i")
+sky_material = ExtResource("2_lo1xn")
+
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.751967, -0.460776, 0.471414, -0.584886, -0.796224, 0.15471, 0.304065, -0.39206, -0.868236, 0, 0, 0)
+transform = Transform3D(-0.241114, 0.532885, 0.811108, 0.351033, -0.731292, 0.584797, 0.904788, 0.425727, -0.0107367, 0, 0, 0)
 light_intensity_lux = 60000.0
 light_temperature = 2620.0
 light_energy = 5.0
@@ -75,7 +89,7 @@ directional_shadow_split_3 = 0.33
 directional_shadow_blend_splits = true
 directional_shadow_max_distance = 200.0
 script = ExtResource("2_lcbvo")
-time_node_path = NodePath("../DateTime")
+sky_material = ExtResource("2_lo1xn")
 
 [node name="Wind" type="Node" parent="."]
 
@@ -99,15 +113,11 @@ unit = "°"
 
 [node name="InputToggle" parent="PanelContainer/VBoxContainer" instance=ExtResource("5_dxdqu")]
 layout_mode = 2
-target_node = NodePath("../../../DateTime")
 target_property = "pause"
 label_text = "Pausa"
-toggle_value = false
-
-[node name="DateTime" parent="." instance=ExtResource("4_6knpi")]
-pause = false
 
 [node name="Clouds" type="GPUParticles3D" parent="."]
+visible = false
 
 [node name="Rain" type="GPUParticles3D" parent="."]
 visible = false
