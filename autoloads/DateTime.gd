@@ -1,7 +1,9 @@
 extends Node
 
-const VERNAL_EQUINOX: int = 81
-const DAYS_IN_YEAR: int = 365
+# Date/time constants
+const DAY: float = 60 * 60 * 24.0
+const J1970: float = 2440588.0
+const J2000: float = 2451545.0
 
 @export var pause: bool = false: # Controlla se il tempo è in pausa
 	set(value):
@@ -9,8 +11,9 @@ const DAYS_IN_YEAR: int = 365
 		set_physics_process(!value)
 		EventBus.emit("pause_toggled", [!value])
 
-var enlapsed_seconds: int = 1712599200
-var seconds_per_game_second: float = 0.0025 #0.00025 # Velocità di simulazione del tempo
+var enlapsed_seconds: int = 1712585000
+var seconds_per_game_second: float = 1 #0.00025
+var time_accumulator: float = 0.0
 
 func _ready() -> void:
 	print("DateTime initialized with time starting from: ", _to_string())
@@ -19,10 +22,20 @@ func _ready() -> void:
 	set_physics_process(true) # Abilita il processo fisico per gestire il tempo
 
 func _physics_process(delta: float) -> void:
-	# Incrementa il tempo di gioco
-	enlapsed_seconds += int(delta / seconds_per_game_second)
-	EventBus.emit("time_updated", [enlapsed_seconds])
-	print(_to_string())
+	# Accumula il tempo
+	time_accumulator += delta
+	
+	# Calcola quanti secondi di gioco sono passati
+	var game_seconds_elapsed = int(time_accumulator * (1.0 / seconds_per_game_second))
+	
+	if game_seconds_elapsed > 0:
+		# Aggiorna il tempo di gioco
+		enlapsed_seconds += game_seconds_elapsed
+		# Sottrai il tempo processato dall'accumulatore
+		time_accumulator -= game_seconds_elapsed * seconds_per_game_second
+		# Emetti l'evento
+		EventBus.emit("time_updated", [enlapsed_seconds])
+		print(_to_string())
 
 # Funzioni per manipolare il tempo
 func add_seconds(seconds: int) -> void:
@@ -40,66 +53,14 @@ func get_timestamp() -> int:
 func get_datetime(timestamp: int) -> Dictionary:
 	return Time.get_datetime_dict_from_unix_time(timestamp)
 
-# Conversione del timestamp interno in data leggibile
-func get_current_datetime() -> Dictionary:
-	return Time.get_datetime_dict_from_unix_time(enlapsed_seconds)
+func to_julian(date: int) -> float:
+	return float(date) / DAY - 0.5 + J1970
 
-# Funzione per calcolare il giorno giuliano
-func get_julian_date(date) -> float:
-	var year: int = date.year
-	var month: int = date.month
-	var day: float = date.day + date.hour / 24.0 + date.minute / 1440.0 + date.second / 86400.0
-	
-	# Correzione per gennaio e febbraio
-	if month <= 2:
-		year -= 1
-		month += 12
-	
-	# Correzione gregoriana
-	
-	var B: float;
-	if year < 1582 or (year == 1582 and month < 10) or (year == 1582 and month == 10 and day < 15):
-		B = 0
-	else:
-		var A: float = floor(year / 100)
-		B = 2 - A + floor(A / 4)
-	
-	# Calcolo del giorno giuliano (JDN)
-	return floor(365.25 * (year + 4716)) + floor(30.6001 * (month + 1)) + day + B - 1524.5
+func from_julian(j: float) -> int:
+	return int((j + 0.5 - J1970) * DAY)
 
-func get_sidereal_time(jd: float, hour: float, minute: float, longitude: float) -> float:
-	# Calcola il tempo frazionario
-	var UT = hour + (minute / 60.0)
-	
-	# Calcola T (secolo giuliano)
-	var T = (jd - 2451545.0) / 36525.0
-	
-	# Calcola GMST (Greenwich Mean Sidereal Time)
-	var GMST = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * pow(T, 2) - pow(T, 3) / 38710000.0
-	GMST += UT * 15.0  # Correzione per l'ora UT
-	GMST = fmod(GMST, 360.0)
-	if GMST < 0.0:
-		GMST += 360.0
-
-	# Calcola LST (Local Sidereal Time)
-	var lst = GMST + longitude
-	lst = fmod(lst, 360.0)
-	if lst < 0.0:
-		lst += 360.0
-
-	return lst
-
-# Funzione per calcolare il giorno dell'anno dall'equinozio di primavera
-func get_day_of_year_from_equinox(julian_day: float) -> float:
-	const equinox_jde: float = 2451623.80984 # Valore fisso per equinozio di primavera vicino a J2000
-	return julian_day - equinox_jde
-
-func get_equation_of_time(day_of_year_from_equinox: float) -> float:
-	var M: float = deg_to_rad(357.5291 + 0.98560028 * day_of_year_from_equinox) # Anomalia media
-	var C: float = deg_to_rad(1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)) # Equazione del centro
-	var L: float = fmod(deg_to_rad(280.46646 + 0.98564736 * day_of_year_from_equinox + C), TAU) # Longitudine solare apparente
-	
-	return 4 * (deg_to_rad(0.0057183) - L + C) / TAU * 60.0 # Equazione del tempo in minuti
+func to_days(date: int) -> float:
+	return to_julian(date) - J2000
 
 func _to_string() -> String:
 	var date: Dictionary = get_datetime(enlapsed_seconds)
