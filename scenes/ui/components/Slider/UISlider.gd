@@ -43,9 +43,9 @@ func _ready() -> void:
 	
 	# Verifica se abbiamo un nodo target
 	if target_node:
-		var node = get_node(target_node)
+		var node: Node = get_node(target_node)
 		# Connetti il segnale al nodo target
-		value_changed.connect(func(value): node.set(target_property, value))
+		value_changed.connect(func(value) -> void: node.set(target_property, value))
 		# Inizializza il valore dello slider con il valore corrente della proprietà target
 		if target_property:
 			slider_value = node.get(target_property)
@@ -56,5 +56,5 @@ func _on_slider_value_changed(value: float) -> void:
 	value_changed.emit(value)
 
 ## Aggiorna l'etichetta con il valore corrente	
-func update_label(value: float):
+func update_label(value: float) -> void:
 	$Value.text = ("%.2f%s" % [value, unit])

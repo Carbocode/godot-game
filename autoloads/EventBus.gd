@@ -7,12 +7,12 @@ func _ready() -> void:
 	print("Event Bus Ready")
 
 # Registra un nuovo evento
-func register(event_name: String):
+func register(event_name: String) -> void:
 	listeners[event_name] = []
 	print("New event registered ", event_name)
 
 # Cancella un evento esistente
-func unregister(event_name: String):
+func unregister(event_name: String) -> void:
 	listeners.erase(event_name)
 	print("Event removed ", event_name)
 

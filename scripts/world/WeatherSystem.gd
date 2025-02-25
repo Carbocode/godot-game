@@ -3,7 +3,7 @@ extends Node3D
 # Parametri per il ciclo giorno/notte
 var day_duration: float = 30.0  # Durata del giorno in secondi
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	#update_sun_position(delta)
 	pass
 	

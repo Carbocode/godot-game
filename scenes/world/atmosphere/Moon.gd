@@ -1,7 +1,7 @@
 extends DirectionalLight3D
 class_name Moon
 
-const E = deg_to_rad(23.4397)
+const E: float = deg_to_rad(23.4397)
 
 @export var sky_material: ShaderMaterial
 
@@ -12,10 +12,10 @@ func _ready() -> void:
 
 # Funzione di callback per l'evento "time_updated"
 func _on_time_updated(timestamp: int) -> void:
-	var moon_position = get_moon_position(timestamp, Geolocation.latitude, Geolocation.longitude)
-	var moon_direction = _calculate_moon_direction(moon_position)
+	var moon_position: Dictionary = get_moon_position(timestamp, Geolocation.latitude, Geolocation.longitude)
+	var moon_direction: Vector3 = _calculate_moon_direction(moon_position)
 	_update_moon_and_sky(moon_direction)
-	_debug_print(moon_position)
+	#_debug_print(moon_position)
 
 # Position calculations
 func right_ascension(l: float, b: float) -> float:
@@ -39,13 +39,13 @@ func astro_refraction(h: float) -> float:
 	return 0.0002967 / tan(h + 0.00312536 / (h + 0.08901179))
 
 func moon_coords(d: float) -> Dictionary:
-	var L = deg_to_rad(218.316 + 13.176396 * d)
-	var M = deg_to_rad(134.963 + 13.064993 * d)
-	var F = deg_to_rad(93.272 + 13.229350 * d)
+	var L: float = deg_to_rad(218.316 + 13.176396 * d)
+	var M: float = deg_to_rad(134.963 + 13.064993 * d)
+	var F: float = deg_to_rad(93.272 + 13.229350 * d)
 	
-	var l = L + deg_to_rad(6.289) * sin(M)
-	var b = deg_to_rad(5.128) * sin(F)
-	var dt = 385001 - 20905 * cos(M)
+	var l: float = L + deg_to_rad(6.289) * sin(M)
+	var b: float = deg_to_rad(5.128) * sin(F)
+	var dt: float = 385001 - 20905 * cos(M)
 	
 	return {
 		"ra": right_ascension(l, b),
@@ -54,14 +54,14 @@ func moon_coords(d: float) -> Dictionary:
 	}
 
 func get_moon_position(date: int, lat: float, lng: float) -> Dictionary:
-	var lw = deg_to_rad(-lng)
-	var phi = deg_to_rad(lat)
-	var d = DateTime.to_days(date)
+	var lw: float = deg_to_rad(-lng)
+	var phi: float = deg_to_rad(lat)
+	var d: float = DateTime.to_days(date)
 	
-	var c = moon_coords(d)
-	var H = sidereal_time(d, lw) - c.ra
-	var h = altitude(H, phi, c.dec)
-	var pa = atan2(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H))
+	var c: Dictionary = moon_coords(d)
+	var H: float = sidereal_time(d, lw) - c.ra
+	var h: float = altitude(H, phi, c.dec)
+	var pa: float = atan2(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H))
 	
 	h = h + astro_refraction(h)
 	
@@ -74,12 +74,12 @@ func get_moon_position(date: int, lat: float, lng: float) -> Dictionary:
 
 # Funzione per calcolare la direzione della Luna in base all'elevazione e azimut
 func _calculate_moon_direction(moon_position: Dictionary) -> Vector3:
-	var altitude: float = moon_position.altitude
-	var azimuth: float = moon_position.azimuth
+	var alt: float = moon_position.altitude
+	var az: float = moon_position.azimuth
 	return Vector3(
-		sin(azimuth) * cos(altitude),
-		sin(altitude),
-		cos(azimuth) * cos(altitude)
+		sin(az) * cos(alt),
+		sin(alt),
+		cos(az) * cos(alt)
 	)
 
 # Funzione per aggiornare la posizione della Luna e il materiale del cielo

@@ -27,7 +27,7 @@ func _ready() -> void:
 	if target_node:
 		var node = get_node(target_node)
 		# Connetti il segnale al nodo target
-		value_changed.connect(func(value): node.set(target_property, value))
+		value_changed.connect(func(value) -> void: node.set(target_property, value))
 
 func _on_toggle_value_changed(value: bool) -> void:
 	print(value)

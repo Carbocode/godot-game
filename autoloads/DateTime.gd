@@ -12,7 +12,7 @@ const J2000: float = 2451545.0
 		EventBus.emit("pause_toggled", [!value])
 
 var enlapsed_seconds: int = 1712585000
-var seconds_per_game_second: float = 1 #0.00025
+var seconds_per_game_second: float = 0.0025
 var time_accumulator: float = 0.0
 
 func _ready() -> void:
@@ -26,7 +26,7 @@ func _physics_process(delta: float) -> void:
 	time_accumulator += delta
 	
 	# Calcola quanti secondi di gioco sono passati
-	var game_seconds_elapsed = int(time_accumulator * (1.0 / seconds_per_game_second))
+	var game_seconds_elapsed: int = int(time_accumulator * (1.0 / seconds_per_game_second))
 	
 	if game_seconds_elapsed > 0:
 		# Aggiorna il tempo di gioco
@@ -35,7 +35,7 @@ func _physics_process(delta: float) -> void:
 		time_accumulator -= game_seconds_elapsed * seconds_per_game_second
 		# Emetti l'evento
 		EventBus.emit("time_updated", [enlapsed_seconds])
-		print(_to_string())
+		#print(_to_string())
 
 # Funzioni per manipolare il tempo
 func add_seconds(seconds: int) -> void:

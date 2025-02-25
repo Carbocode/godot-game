@@ -23,6 +23,7 @@ config/windows_native_icon="res://icon.svg"
 EventBus="*res://autoloads/EventBus.gd"
 DateTime="*res://autoloads/DateTime.gd"
 Geolocation="*res://autoloads/Geolocation.gd"
+ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
 
 [debug]
 
@@ -32,7 +33,6 @@ gdscript/warnings/unsafe_property_access=1
 gdscript/warnings/unsafe_method_access=1
 gdscript/warnings/unsafe_cast=1
 gdscript/warnings/unsafe_call_argument=1
-gdscript/warnings/return_value_discarded=1
 
 [display]
 
@@ -44,7 +44,7 @@ movie_writer/disable_vsync=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg")
+enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg", "res://addons/terrain_3d/plugin.cfg")
 
 [input]
 
@@ -86,6 +86,29 @@ zoom_out={
 [rendering]
 
 lights_and_shadows/use_physical_light_units=true
+
+[shader_globals]
+
+foam_color={
+"type": "color",
+"value": Color(0.490196, 0.407843, 0.341176, 1)
+}
+water_color={
+"type": "color",
+"value": Color(0.0117647, 0.0196078, 0.027451, 1)
+}
+num_cascades={
+"type": "uint",
+"value": 3
+}
+displacements={
+"type": "sampler2DArray",
+"value": ""
+}
+normals={
+"type": "sampler2DArray",
+"value": ""
+}
 
 [xr]
 

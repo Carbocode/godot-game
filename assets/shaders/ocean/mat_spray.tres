@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://5xqyddws6rt5"]
+
+[ext_resource type="Shader" path="res://assets/shaders/ocean/spatial/sea_spray.gdshader" id="1_eysee"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_eysee")

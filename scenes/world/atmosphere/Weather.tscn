@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scenes/world/atmosphere/Moon.gd" id="2_a2q3i"]
 [ext_resource type="PackedScene" uid="uid://dj06hrahg8sb1" path="res://scenes/ui/components/Slider/UISlider.tscn" id="2_cx4rv"]
 [ext_resource type="Script" path="res://scenes/world/atmosphere/Sun.gd" id="2_lcbvo"]
-[ext_resource type="Material" uid="uid://cs64jvaldfbxr" path="res://assets/shaders/Sky.tres" id="2_lo1xn"]
+[ext_resource type="Material" uid="uid://cs64jvaldfbxr" path="res://assets/shaders/sky/Sky.tres" id="2_lo1xn"]
 [ext_resource type="PackedScene" uid="uid://bejq348p1en4l" path="res://scenes/ui/components/Toggle/UIToggle.tscn" id="5_dxdqu"]
 
 [sub_resource type="Sky" id="Sky_0rto3"]

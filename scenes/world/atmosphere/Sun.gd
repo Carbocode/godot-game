@@ -3,7 +3,7 @@ class_name Sun extends DirectionalLight3D
 # Costanti
 const MIN_ELEVATION: float = deg_to_rad(-6) # Crepuscolo civile
 const MAX_ELEVATION: float = deg_to_rad(40) # Pieno giorno
-const E = deg_to_rad(23.4397)
+const E: float = deg_to_rad(23.4397)
 
 # Variabili esportate
 @export var sky_material: ShaderMaterial
@@ -17,15 +17,15 @@ func _on_time_updated(timestamp: int) -> void:
 	var solar_position: Dictionary = get_sun_position(timestamp, Geolocation.latitude, Geolocation.longitude)
 	var sun_direction: Vector3 = _calculate_sun_direction(solar_position)
 	_update_sun_and_sky(sun_direction, solar_position.altitude)
-	_debug_print(solar_position)
+	#_debug_print(solar_position)
 
 func _calculate_sun_direction(solar_position: Dictionary) -> Vector3:
-	var elevation: float = solar_position.altitude
-	var azimuth: float = solar_position.azimuth
+	var el: float = solar_position.altitude
+	var az: float = solar_position.azimuth
 	return Vector3(
-		sin(azimuth) * cos(elevation),
-		sin(elevation),
-		cos(azimuth) * cos(elevation)
+		sin(az) * cos(el),
+		sin(el),
+		cos(az) * cos(el)
 	)
 
 func right_ascension(l: float, b: float) -> float:
@@ -47,13 +47,13 @@ func solar_mean_anomaly(d: float) -> float:
 	return deg_to_rad(357.5291 + 0.98560028 * d)
 
 func ecliptic_longitude(M: float) -> float:
-	var C = deg_to_rad(1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M))
-	var P =  deg_to_rad(102.9372)
+	var C: float = deg_to_rad(1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M))
+	var P: float =  deg_to_rad(102.9372)
 	return M + C + P + PI
 
 func sun_coords(d: float) -> Dictionary:
-	var M = solar_mean_anomaly(d)
-	var L = ecliptic_longitude(M)
+	var M: float = solar_mean_anomaly(d)
+	var L: float = ecliptic_longitude(M)
 	return {
 		"dec": declination(L, 0),
 		"ra": right_ascension(L, 0)
@@ -65,12 +65,12 @@ func astro_refraction(h: float) -> float:
 	return 0.0002967 / tan(h + 0.00312536 / (h + 0.08901179))
 
 func get_sun_position(date: int, lat: float, lng: float) -> Dictionary:
-	var lw = deg_to_rad(-lng)
-	var phi = deg_to_rad(lat)
-	var d = DateTime.to_days(date)
+	var lw: float = deg_to_rad(-lng)
+	var phi: float = deg_to_rad(lat)
+	var d: float = DateTime.to_days(date)
 	
-	var c = sun_coords(d)
-	var H = sidereal_time(d, lw) - c.ra
+	var c: Dictionary = sun_coords(d)
+	var H: float = sidereal_time(d, lw) - c.ra
 	
 	return {
 		"azimuth": azimuth(H, phi, c.dec),
