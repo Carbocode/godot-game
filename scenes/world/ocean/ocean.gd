@@ -3,14 +3,12 @@ extends Node3D
 
 var clipmap_tile_size := 1.0 # Not the smallest tile size, but one that reduces the amount of vertex jitter.
 var previous_tile := Vector3i.MAX
-var should_render_imgui := not Engine.is_editor_hint()
 
 @onready var viewport : Variant = Engine.get_singleton(&'EditorInterface').get_editor_viewport_3d(0) if Engine.is_editor_hint() else get_viewport()
 @onready var camera : Variant = viewport.get_camera_3d()
 @onready var water := $Water
 
 # References to various parameters (for imgui)
-@onready var _camera_fov := [camera.fov]
 @onready var _updates_per_second := [water.updates_per_second]
 @onready var _water_color := [water.water_color.r, water.water_color.g, water.water_color.b]
 @onready var _foam_color := [water.foam_color.r, water.foam_color.g, water.foam_color.b]
@@ -18,8 +16,7 @@ var should_render_imgui := not Engine.is_editor_hint()
 
 func _process(delta : float) -> void:
 	if not Engine.is_editor_hint():
-		if should_render_imgui:
-			_render_imgui()
+		_render_imgui()
 
 func _physics_process(delta: float) -> void:
 	# Shift water mesh whenever player moves into a new tile.
@@ -27,19 +24,6 @@ func _physics_process(delta: float) -> void:
 	if not tile.is_equal_approx(previous_tile):
 		water.global_position = tile * clipmap_tile_size
 		previous_tile = tile
-
-	# Vary audio samples based on total wind speed across all cascades.
-	var total_wind_speed := 0.0
-	for params in water.parameters:
-		total_wind_speed += params.wind_speed
-
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&'toggle_imgui'):
-		should_render_imgui = not should_render_imgui
-	elif event.is_action_pressed(&'toggle_fullscreen'):
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED else DisplayServer.WINDOW_MODE_WINDOWED)
-	elif event.is_action_pressed(&'ui_cancel'):
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
 func imgui_text_tooltip(title : String, tooltip : String) -> void:
 	ImGui.Text(title); if ImGui.IsItemHovered() and not tooltip.is_empty(): ImGui.SetTooltip(tooltip)
